@@ -13,6 +13,8 @@ import type {
 } from "./AgentTransport";
 import type { UiToAgentEvent } from "./eventTypes";
 
+const DEFAULT_DIRECT_LINE_DOMAIN = "https://europe.directline.botframework.com/v3/directline";
+
 export class DirectLineTransport implements AgentTransport {
   private directLine: DirectLine | null = null;
   private listeners = new Set<AgentEventListener>();
@@ -24,6 +26,7 @@ export class DirectLineTransport implements AgentTransport {
   private lastConversationId: string | null = null;
   private connectedReady = false;
   private reconnecting = false;
+  private localClientActivityIds = new Set<string>();
 
   async connect(): Promise<void> {
     await this.initializeDirectLine();
@@ -49,6 +52,8 @@ export class DirectLineTransport implements AgentTransport {
     const json = await response.json();
     const tokenPayload = copilotTokenResponseSchema.parse(json);
     this.lastConversationId = tokenPayload.conversationId;
+    const directLineDomain =
+      process.env.NEXT_PUBLIC_DIRECT_LINE_DOMAIN?.trim() || DEFAULT_DIRECT_LINE_DOMAIN;
 
     this.activitySubscription?.unsubscribe();
     this.statusSubscription?.unsubscribe();
@@ -62,17 +67,19 @@ export class DirectLineTransport implements AgentTransport {
 
     this.directLine = new DirectLine({
       token: tokenPayload.token,
-      conversationId: tokenPayload.conversationId,
-      // Token endpoint only returns token/conversationId. Without a streamUrl,
-      // websocket reconnect can fail with 403 in some Copilot Studio setups.
-      webSocket: false,
+      domain: directLineDomain,
+      webSocket: true,
+      conversationStartProperties: {
+        locale: "es-ES",
+      },
     });
 
     this.statusSubscription = this.directLine.connectionStatus$.subscribe({
       next: (status) => {
         this.handleDirectLineConnectionStatus(status);
       },
-      error: () => {
+      error: (error: unknown) => {
+        this.logDirectLineError("connectionStatus$", error);
         this.emitConnectionStatus("failed");
       },
     });
@@ -81,7 +88,8 @@ export class DirectLineTransport implements AgentTransport {
       next: (activity) => {
         this.handleActivity(activity);
       },
-      error: () => {
+      error: (error: unknown) => {
+        this.logDirectLineError("activity$", error);
         this.emitConnectionStatus("failed");
       },
     });
@@ -135,7 +143,15 @@ export class DirectLineTransport implements AgentTransport {
       from: { id: this.userId, name: "Usuario" },
       text,
       locale: "es-ES",
+      channelData: {
+        clientActivityId: crypto.randomUUID(),
+      },
     };
+
+    const clientActivityId = this.extractClientActivityId(activity);
+    if (clientActivityId) {
+      this.localClientActivityIds.add(clientActivityId);
+    }
 
     const directLine = this.directLine;
     try {
@@ -151,7 +167,8 @@ export class DirectLineTransport implements AgentTransport {
           },
         });
       });
-    } catch {
+    } catch (error) {
+      this.logDirectLineError("postActivity", error);
       await this.reconnectWithFreshToken();
 
       if (!this.directLine || !this.connectedReady || this.connectionStatus !== "online") {
@@ -165,6 +182,7 @@ export class DirectLineTransport implements AgentTransport {
             resolve();
           },
           error: (error: unknown) => {
+            this.logDirectLineError("postActivity.retry", error);
             retrySubscription?.unsubscribe();
             reject(error);
           },
@@ -225,6 +243,7 @@ export class DirectLineTransport implements AgentTransport {
     this.emitConnectionStatus("disconnected");
     this.lastConversationId = null;
     this.connectedReady = false;
+    this.localClientActivityIds.clear();
     this.listeners.clear();
     this.statusListeners.clear();
     return;
@@ -271,12 +290,123 @@ export class DirectLineTransport implements AgentTransport {
       return;
     }
 
+    if (this.isLocalEcho(activity)) {
+      return;
+    }
+
     const mappedEvent = mapDirectLineActivityToAgentEvent(activity);
     if (!mappedEvent) {
       return;
     }
 
-    const safeEvent = agentToUiEventSchema.parse(mappedEvent);
+    const parsedEvent = agentToUiEventSchema.safeParse(mappedEvent);
+    if (!parsedEvent.success) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[DirectLineTransport] Ignored invalid mapped event", {
+          issues: parsedEvent.error.issues,
+        });
+      }
+      return;
+    }
+
+    const safeEvent = parsedEvent.data;
     this.listeners.forEach((listener) => listener(safeEvent));
+  }
+
+  private logDirectLineError(context: string, error: unknown): void {
+    if (process.env.NODE_ENV !== "development") {
+      return;
+    }
+
+    const details = this.extractErrorDetails(error);
+    console.error("[DirectLineTransport]", context, details);
+  }
+
+  private extractErrorDetails(error: unknown): {
+    status: number | null;
+    message: string;
+    body: string | null;
+  } {
+    const fallback = {
+      status: null,
+      message: error instanceof Error ? error.message : String(error),
+      body: null,
+    };
+
+    if (!this.isRecord(error)) {
+      return fallback;
+    }
+
+    const status = this.toNumber(error.status) ?? this.toNumber(error.statusCode);
+    const message =
+      this.toString(error.message) ?? this.toString(error.error) ?? fallback.message;
+    const rawBody = error.body ?? error.responseText ?? error.response;
+    const body = this.sanitizeBody(rawBody);
+
+    return { status: status ?? null, message, body };
+  }
+
+  private sanitizeBody(rawBody: unknown): string | null {
+    if (rawBody == null) {
+      return null;
+    }
+
+    const bodyText = this.toString(rawBody) ?? JSON.stringify(rawBody);
+    if (!bodyText) {
+      return null;
+    }
+
+    return bodyText
+      .replace(/("token"\s*:\s*")([^"]+)(")/gi, '$1***$3')
+      .replace(/(token=)([^&\s]+)/gi, "$1***");
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+  }
+
+  private toNumber(value: unknown): number | null {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    return null;
+  }
+
+  private toString(value: unknown): string | null {
+    if (typeof value === "string") {
+      return value;
+    }
+
+    return null;
+  }
+
+  private extractClientActivityId(activity: Activity): string | null {
+    const channelData = activity.channelData;
+    if (!channelData || typeof channelData !== "object") {
+      return null;
+    }
+
+    const maybeId = (channelData as Record<string, unknown>).clientActivityId;
+    return typeof maybeId === "string" ? maybeId : null;
+  }
+
+  private isLocalEcho(activity: Activity): boolean {
+    const clientActivityId = this.extractClientActivityId(activity);
+    if (!clientActivityId) {
+      return false;
+    }
+
+    const isEcho = this.localClientActivityIds.has(clientActivityId);
+    if (isEcho) {
+      this.localClientActivityIds.delete(clientActivityId);
+    }
+
+    return isEcho;
   }
 }
