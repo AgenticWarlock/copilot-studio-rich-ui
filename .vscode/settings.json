@@ -2,6 +2,19 @@
     "chat.tools.terminal.autoApprove": {
         "npx create-next-app@latest": true,
         "npm install": true,
-        "npm config": true
-    }
+        "npm config": true,
+        "npx eslint": true
+    },
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".next{,/**}",
+        ".git{,/**}",
+        ".vscode{,/**}",
+        ".env",
+        ".env.local",
+        ".env.*.local",
+        "coverage{,/**}",
+        "*.log",
+        ".DS_Store"
+    ]
 }

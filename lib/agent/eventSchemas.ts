@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const noHtml = (value: string) => !/<[^>]+>/.test(value);
+const MAX_AGENT_MESSAGE_LENGTH = 4000;
 
 export const flightOptionSchema = z.object({
   id: z.string().min(1),
@@ -14,12 +15,45 @@ export const flightOptionSchema = z.object({
   priceEur: z.number().positive(),
 });
 
+/**
+ * Schema para validar el campo `value` de una actividad DirectLine de tipo
+ * event / name === "ui.showDatePicker". Formato estricto enviado por Copilot Studio.
+ */
+export const showDatePickerActivityValueSchema = z.object({
+  origin: z.string().min(1),
+  destination: z.string().min(1),
+  minDate: z.string().date(),
+  mode: z.literal("range"),
+});
+
+/**
+ * Schema para validar el campo `value` de la actividad DirectLine
+ * event / name === "ui.showTravelPartySelector".
+ */
+export const showTravelPartySelectorActivityValueSchema = z.object({
+  minPassengers: z.number().int().min(1),
+  maxPassengers: z.number().int().min(1),
+  defaultPassengers: z.number().int().min(1),
+  allowPets: z.boolean(),
+});
+
+/**
+ * Schema para validar el campo `value` de la actividad DirectLine
+ * event / name === "ui.showCabinSelector".
+ */
+export const showCabinSelectorActivityValueSchema = z.object({
+  cabinId: z.string().min(1),
+});
+
 export const agentToUiEventSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("ui.showDatePicker"),
     payload: z.object({
       destination: z.string().min(1),
-      hint: z.string().min(1),
+      hint: z.string().optional(),
+      origin: z.string().optional(),
+      minDate: z.string().date().optional(),
+      mode: z.literal("range").optional(),
     }),
   }),
   z.object({
@@ -37,9 +71,17 @@ export const agentToUiEventSchema = z.discriminatedUnion("type", [
       text: z
         .string()
         .min(1)
-        .max(500)
+        .max(MAX_AGENT_MESSAGE_LENGTH)
         .refine(noHtml, "Agent messages cannot contain HTML."),
     }),
+  }),
+  z.object({
+    type: z.literal("ui.showTravelPartySelector"),
+    payload: showTravelPartySelectorActivityValueSchema,
+  }),
+  z.object({
+    type: z.literal("ui.showCabinSelector"),
+    payload: showCabinSelectorActivityValueSchema,
   }),
 ]);
 
@@ -59,7 +101,27 @@ export const uiToAgentEventSchema = z.discriminatedUnion("type", [
       flightId: z.string().min(1),
     }),
   }),
+  z.object({
+    type: z.literal("ui.travelPartySelected"),
+    payload: z.object({
+      passengers: z.number().int().min(1),
+      hasPets: z.boolean(),
+    }),
+  }),
+  z.object({
+    type: z.literal("ui.cabinSelected"),
+    payload: z.object({
+      cabinId: z.string().min(1),
+      cabinName: z.string().min(1),
+      passengers: z.number().int().min(1),
+      hasPets: z.boolean(),
+      priceDelta: z.number().min(0),
+    }),
+  }),
 ]);
 
 export type AgentToUiEventSchema = z.infer<typeof agentToUiEventSchema>;
 export type UiToAgentEventSchema = z.infer<typeof uiToAgentEventSchema>;
+export type ShowDatePickerActivityValue = z.infer<typeof showDatePickerActivityValueSchema>;
+export type ShowTravelPartySelectorActivityValue = z.infer<typeof showTravelPartySelectorActivityValueSchema>;
+export type ShowCabinSelectorActivityValue = z.infer<typeof showCabinSelectorActivityValueSchema>;

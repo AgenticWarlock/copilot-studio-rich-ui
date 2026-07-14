@@ -1,9 +1,15 @@
 export type AgentToUiEventType =
   | "ui.showDatePicker"
   | "ui.showFlights"
-  | "ui.showMessage";
+  | "ui.showMessage"
+  | "ui.showTravelPartySelector"
+  | "ui.showCabinSelector";
 
-export type UiToAgentEventType = "ui.datesSelected" | "ui.flightSelected";
+export type UiToAgentEventType =
+  | "ui.datesSelected"
+  | "ui.flightSelected"
+  | "ui.travelPartySelected"
+  | "ui.cabinSelected";
 
 export interface FlightOption {
   id: string;
@@ -19,7 +25,10 @@ export interface FlightOption {
 
 export interface ShowDatePickerPayload {
   destination: string;
-  hint: string;
+  hint?: string;
+  origin?: string;
+  minDate?: string;
+  mode?: "range";
 }
 
 export interface ShowFlightsPayload {
@@ -33,6 +42,17 @@ export interface ShowMessagePayload {
   text: string;
 }
 
+export interface ShowTravelPartySelectorPayload {
+  minPassengers: number;
+  maxPassengers: number;
+  defaultPassengers: number;
+  allowPets: boolean;
+}
+
+export interface ShowCabinSelectorPayload {
+  cabinId: string;
+}
+
 export interface DatesSelectedPayload {
   origin: string;
   destination: string;
@@ -44,14 +64,31 @@ export interface FlightSelectedPayload {
   flightId: string;
 }
 
+export interface TravelPartySelectedPayload {
+  passengers: number;
+  hasPets: boolean;
+}
+
+export interface CabinSelectedPayload {
+  cabinId: string;
+  cabinName: string;
+  passengers: number;
+  hasPets: boolean;
+  priceDelta: number;
+}
+
 export type AgentToUiEvent =
   | { type: "ui.showDatePicker"; payload: ShowDatePickerPayload }
   | { type: "ui.showFlights"; payload: ShowFlightsPayload }
-  | { type: "ui.showMessage"; payload: ShowMessagePayload };
+  | { type: "ui.showMessage"; payload: ShowMessagePayload }
+  | { type: "ui.showTravelPartySelector"; payload: ShowTravelPartySelectorPayload }
+  | { type: "ui.showCabinSelector"; payload: ShowCabinSelectorPayload };
 
 export type UiToAgentEvent =
   | { type: "ui.datesSelected"; payload: DatesSelectedPayload }
-  | { type: "ui.flightSelected"; payload: FlightSelectedPayload };
+  | { type: "ui.flightSelected"; payload: FlightSelectedPayload }
+  | { type: "ui.travelPartySelected"; payload: TravelPartySelectedPayload }
+  | { type: "ui.cabinSelected"; payload: CabinSelectedPayload };
 
 export interface ChatMessageModel {
   id: string;

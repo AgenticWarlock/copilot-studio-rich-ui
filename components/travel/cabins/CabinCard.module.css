@@ -1,0 +1,137 @@
+.card {
+  display: grid;
+  gap: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(13, 38, 86, 0.1);
+  box-shadow: 0 4px 20px rgba(13, 38, 86, 0.12);
+  overflow: hidden;
+  background: white;
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 16px;
+}
+
+.info {
+  display: grid;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.name {
+  font-size: 16px !important;
+  color: #0d2656;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #4a6a8a;
+}
+
+/* Context from previous selections */
+.contextBadges {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  background: #f0f8ff;
+  border-radius: 8px;
+  border-left: 3px solid #00b4d8;
+}
+
+.contextItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #0d4a6e;
+  font-weight: 500;
+}
+
+.contextIcon {
+  color: #00b4d8;
+  flex-shrink: 0;
+}
+
+.contextWarn {
+  color: #7a4a00;
+}
+
+.contextIconWarn {
+  color: #f5a000;
+  flex-shrink: 0;
+}
+
+/* Features list */
+.features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #2a4a6a;
+}
+
+.featureDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00b4d8;
+  flex-shrink: 0;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f0f6ff, #e8f2fc);
+  border-top: 1px solid rgba(13, 38, 86, 0.08);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.priceLabel {
+  display: block;
+  color: #5a7aaa;
+  font-size: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0d2656;
+}
+
+.selectBtn {
+  white-space: nowrap;
+}

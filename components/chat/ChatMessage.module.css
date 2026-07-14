@@ -1,30 +1,95 @@
 .message {
-  max-width: 88%;
-  border-radius: 12px;
-  padding: 10px 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  max-width: 80%;
+  border-radius: 16px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 3px rgba(13, 38, 86, 0.08);
+  word-break: break-word;
 }
 
 .role {
   display: block;
-  margin-bottom: 4px;
-  opacity: 0.8;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
 }
 
+.content :global(p) {
+  margin: 0;
+}
+
+.content :global(p + p) {
+  margin-top: 8px;
+}
+
+.content :global(ul),
+.content :global(ol) {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.content :global(li + li) {
+  margin-top: 4px;
+}
+
+.content :global(code) {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.content :global(pre) {
+  margin: 8px 0 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.content :global(pre code) {
+  padding: 0;
+  background: transparent;
+}
+
+/* User bubble - navy Trasmed */
 .user {
   margin-left: auto;
-  background: #d4eefb;
-  border: 1px solid #98cee8;
+  background: linear-gradient(135deg, #0d2656 0%, #1a4a9e 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
 }
 
+.user .role {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.user .content :global(code) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Agent bubble - white with navy accent */
 .agent {
   margin-right: auto;
   background: #ffffff;
-  border: 1px solid #d6d6d6;
+  border: 1px solid rgba(13, 38, 86, 0.12);
+  color: #0d2656;
+  border-bottom-left-radius: 4px;
 }
 
+.agent .role {
+  color: #1a4a9e;
+}
+
+/* System bubble - yellow Trasmed */
 .system {
   margin-right: auto;
-  background: #fff5d6;
-  border: 1px solid #f4d57b;
+  background: #fffbe6;
+  border: 1px solid rgba(245, 196, 0, 0.5);
+  color: #5a4000;
+  border-radius: 10px;
+  font-size: 13px;
 }

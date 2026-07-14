@@ -1,0 +1,9 @@
+[config]
+# project = .
+#
+# SCM_DO_BUILD_DURING_DEPLOYMENT=true debe configurarse como
+# App Setting en Azure Portal (no es una clave Kudu válida aquí).
+#
+# Oryx detecta automáticamente Node.js en la raíz y ejecuta:
+#   npm ci && npm run build
+# El comando de arranque se configura en Azure como: npm start

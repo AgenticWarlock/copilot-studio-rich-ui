@@ -1,32 +1,82 @@
 .page {
-  min-height: 100%;
+  min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
   padding: 20px;
-  gap: 14px;
+  gap: 16px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .header {
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: linear-gradient(140deg, #f7d8a4, #f9f3df);
-  border: 1px solid #ecc372;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0d2656 0%, #1a4a9e 100%);
+  box-shadow: 0 4px 16px rgba(13, 38, 86, 0.3);
+  display: flex;
+  align-items: center;
+}
+
+.headerBrand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.headerLogo {
+  font-size: 26px;
+  filter: grayscale(0);
+  color: #00b4d8;
+}
+
+.headerTitle {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.headerSub {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 1px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .main {
-  display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(340px, 1.1fr);
-  gap: 14px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chatPanel {
+  flex: 1;
   min-height: 0;
 }
 
-.chatPanel,
-.richPanel {
-  min-height: 0;
+.datePickerPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-@media (max-width: 960px) {
-  .main {
-    grid-template-columns: 1fr;
+.panelError {
+  font-size: 13px;
+  color: #c4000a;
+  padding: 6px 10px;
+  background: #fff0f0;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 0, 10, 0.2);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 12px;
   }
 }

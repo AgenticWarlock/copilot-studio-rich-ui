@@ -1,4 +1,6 @@
-import { Body1, Caption1 } from "@fluentui/react-components";
+import { Caption1 } from "@fluentui/react-components";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { ChatMessageModel } from "@/lib/agent/eventTypes";
 import styles from "./ChatMessage.module.css";
 
@@ -17,7 +19,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <article className={`${styles.message} ${styles[message.role]}`} aria-live="polite">
       <Caption1 className={styles.role}>{roleLabel}</Caption1>
-      <Body1>{message.text}</Body1>
+      <div className={styles.content}>
+        <Markdown remarkPlugins={[remarkGfm]}>{message.text}</Markdown>
+      </div>
     </article>
   );
 }

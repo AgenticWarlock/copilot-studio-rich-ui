@@ -26,11 +26,11 @@ export function ChatComposer({ onSend, disabled = false }: ChatComposerProps) {
   return (
     <div className={styles.composer}>
       <label htmlFor="chat-input" className={styles.label}>
-        Mensaje
+        Escribe tu mensaje
       </label>
       <Textarea
         id="chat-input"
-        placeholder="Ejemplo: Quiero viajar a Roma"
+        placeholder="Ejemplo: Quiero viajar a Mallorca el próximo fin de semana"
         value={value}
         onChange={(_, data) => setValue(data.value)}
         onKeyDown={async (event) => {
@@ -40,14 +40,17 @@ export function ChatComposer({ onSend, disabled = false }: ChatComposerProps) {
           }
         }}
         disabled={disabled}
-        resize="vertical"
+        resize="none"
+        rows={2}
         aria-label="Escribe un mensaje para el agente"
+        style={{ gridColumn: "1 / 2", gridRow: "2" }}
       />
       <Button
         appearance="primary"
         icon={<Send24Regular />}
         onClick={handleSend}
         disabled={disabled}
+        style={{ gridColumn: "2 / 3", gridRow: "2", alignSelf: "end" }}
       >
         Enviar
       </Button>

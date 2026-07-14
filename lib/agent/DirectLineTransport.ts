@@ -2,6 +2,7 @@ import { ConnectionStatus, DirectLine, type Activity } from "botframework-direct
 import { agentToUiEventSchema } from "@/lib/agent/eventSchemas";
 import {
   mapDirectLineActivityToAgentEvent,
+  mapDirectLineEventActivityToAgentEvent,
   isOwnUserMessage,
 } from "@/lib/agent/directLineAdapters";
 import { copilotTokenResponseSchema } from "@/lib/agent/tokenSchemas";
@@ -210,8 +211,61 @@ export class DirectLineTransport implements AgentTransport {
   }
 
   async sendEvent(event: UiToAgentEvent): Promise<void> {
-    void event;
-    return;
+    if (!this.directLine || !this.connectedReady || this.connectionStatus !== "online") {
+      throw new Error("DirectLineTransport is not connected.");
+    }
+
+    let activityName: string;
+    let activityValue: unknown;
+
+    switch (event.type) {
+      case "ui.datesSelected":
+        activityName = "ui.datesSelected";
+        activityValue = {
+          departureDate: event.payload.fromDate,
+          returnDate: event.payload.toDate,
+          origin: event.payload.origin,
+          destination: event.payload.destination,
+        };
+        break;
+      case "ui.travelPartySelected":
+        activityName = "ui.travelPartySelected";
+        activityValue = event.payload;
+        break;
+      case "ui.cabinSelected":
+        activityName = "ui.cabinSelected";
+        activityValue = event.payload;
+        break;
+      default:
+        return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[DirectLineTransport] Sending event: ${activityName}`, activityValue);
+    }
+
+    const activity = {
+      type: "event",
+      name: activityName,
+      from: { id: this.userId, name: "Usuario" },
+      value: activityValue,
+      locale: "es-ES",
+    } as Activity;
+
+    const directLine = this.directLine;
+    await new Promise<void>((resolve, reject) => {
+      const subscription = directLine.postActivity(activity).subscribe({
+        next: () => {
+          subscription.unsubscribe();
+          resolve();
+        },
+        error: (error: unknown) => {
+          this.logDirectLineError("sendEvent.postActivity", error);
+          subscription.unsubscribe();
+          reject(error);
+        },
+      });
+    });
   }
 
   subscribe(listener: AgentEventListener): () => void {
@@ -294,6 +348,36 @@ export class DirectLineTransport implements AgentTransport {
       return;
     }
 
+    // Actividades de tipo "event" (ui.showDatePicker, etc.) — no mostrar como mensaje
+    if (activity.type === "event") {
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[DirectLineTransport] Event activity received: name="${activity.name}"`);
+      }
+
+      const mappedEvent = mapDirectLineEventActivityToAgentEvent(activity);
+      if (!mappedEvent) {
+        return;
+      }
+
+      const parsedEvent = agentToUiEventSchema.safeParse(mappedEvent);
+      if (!parsedEvent.success) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[DirectLineTransport] Event schema validation failed", {
+            issues: parsedEvent.error.issues,
+          });
+        }
+        return;
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[DirectLineTransport] Event validated and emitted: ${parsedEvent.data.type}`);
+      }
+
+      this.listeners.forEach((listener) => listener(parsedEvent.data));
+      return;
+    }
+
+    // Actividades de tipo "message"
     const mappedEvent = mapDirectLineActivityToAgentEvent(activity);
     if (!mappedEvent) {
       return;
