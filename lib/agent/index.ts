@@ -1,4 +1,9 @@
-export type { AgentTransport, AgentConnectionStatus, AgentConnectionUpdateHandler } from "./AgentTransport";
+export type {
+  AgentTransport,
+  AgentConnectionStatus,
+  AgentConnectionStatusListener,
+  AgentEventListener,
+} from "./AgentTransport";
 export { createAgentTransport, getConfiguredTransportMode } from "./createTransport";
 export type {
   AgentToUiEvent,
