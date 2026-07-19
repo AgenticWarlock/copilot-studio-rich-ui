@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { FluentStyleRegistry } from "./FluentStyleRegistry";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ASistente de reservas",
+  title: "Nauta de reservas",
   description: "POC de agencia de viajes con agente de IA y UI rica",
 };
 
@@ -24,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <FluentStyleRegistry>{children}</FluentStyleRegistry>
+      </body>
     </html>
   );
 }

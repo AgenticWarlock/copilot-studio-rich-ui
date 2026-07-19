@@ -9,7 +9,6 @@ import { TravelPartySelector } from "@/components/travel/party";
 import { CabinSelector } from "@/components/travel/cabins";
 import {
   createAgentTransport,
-  getConfiguredTransportMode,
   type AgentConnectionStatus,
   type AgentTransport,
   type ChatMessageModel,
@@ -40,7 +39,6 @@ const createMessage = (
 export default function Home() {
   const transportRef = useRef<AgentTransport | null>(null);
   const busyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const transportMode = getConfiguredTransportMode();
   const [messages, setMessages] = useState<ChatMessageModel[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<AgentConnectionStatus>("disconnected");
@@ -305,11 +303,12 @@ export default function Home() {
     <FluentProvider theme={trasmedTheme}>
       <div className={styles.page}>
         <header className={styles.header}>
+          <div className={styles.headerWaves} aria-hidden="true" />
+          <div className={styles.headerBoat} aria-hidden="true" />
           <div className={styles.headerBrand}>
             <span className={styles.headerLogo}>⚓</span>
             <div>
-              <Text className={styles.headerTitle}>ASistente de reservas</Text>
-              <Text className={styles.headerSub}>Asistente de reservas · {transportMode}</Text>
+              <Text className={styles.headerTitle}>Asistente de Reservas + Copilot Studio Direct Line (directline)</Text>
             </div>
           </div>
         </header>

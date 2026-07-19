@@ -252,6 +252,18 @@ export class DirectLineTransport implements AgentTransport {
       locale: "es-ES",
     } as Activity;
 
+    if (activityName === "ui.cabinSelected") {
+      const value = (activity.value ?? undefined) as Record<string, unknown> | undefined;
+      console.debug("[ui.cabinSelected] outgoing activity", activity);
+      console.debug("[ui.cabinSelected] fields", {
+        type: activity.type,
+        name: activity.name,
+        text: activity.text,
+        value: activity.value,
+        summaryInput: value?.summaryInput,
+      });
+    }
+
     const directLine = this.directLine;
     await new Promise<void>((resolve, reject) => {
       const subscription = directLine.postActivity(activity).subscribe({
@@ -304,6 +316,10 @@ export class DirectLineTransport implements AgentTransport {
   }
 
   private emitConnectionStatus(status: AgentConnectionStatus): void {
+    if (this.connectionStatus === status) {
+      return;
+    }
+
     this.connectionStatus = status;
     if (status !== "online") {
       this.connectedReady = false;
@@ -335,6 +351,12 @@ export class DirectLineTransport implements AgentTransport {
     }
 
     if (status === ConnectionStatus.Uninitialized || status === ConnectionStatus.Ended) {
+      // Direct Line can briefly bounce through Uninitialized/Ended while establishing the socket.
+      // Ignore those transient states once connect() has already moved us into connecting/reconnecting.
+      if (this.connectionStatus === "connecting" || this.connectionStatus === "reconnecting") {
+        return;
+      }
+
       this.emitConnectionStatus("disconnected");
     }
   }

@@ -12,6 +12,9 @@
 }
 
 .header {
+  --wave-base: #2c6fa8;
+  --wave-mid: #68b3e6;
+  --wave-top: #8fc4e5;
   padding: 13px 18px;
   border-radius: 14px;
   background: linear-gradient(135deg, #397dbe 0%, #2a649f 55%, #24568b 100%);
@@ -23,15 +26,67 @@
   overflow: hidden;
 }
 
-.header::after {
+.headerWaves {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.headerWaves::before,
+.headerWaves::after,
+.header::before {
   content: "";
   position: absolute;
-  width: 180px;
-  height: 180px;
-  right: -58px;
-  top: -76px;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, rgba(202, 230, 252, 0.4) 0%, rgba(202, 230, 252, 0.02) 72%);
+  left: 0;
+  right: 0;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+.header::before {
+  z-index: 0;
+  bottom: -58px;
+  height: 172px;
+  background: var(--wave-base);
+  clip-path: polygon(0% 100%, 0% 56%, 12% 64%, 24% 60%, 36% 65%, 50% 58%, 64% 66%, 78% 59%, 90% 63%, 100% 57%, 100% 100%);
+  animation: waveBase 10s ease-in-out infinite;
+}
+
+.headerWaves::before {
+  z-index: 1;
+  bottom: -48px;
+  height: 154px;
+  background: var(--wave-mid);
+  opacity: 0.94;
+  clip-path: polygon(0% 100%, 0% 60%, 14% 54%, 28% 63%, 44% 56%, 58% 64%, 74% 55%, 88% 62%, 100% 58%, 100% 100%);
+  animation: waveMid 12s ease-in-out infinite;
+}
+
+.headerWaves::after {
+  z-index: 2;
+  bottom: -38px;
+  height: 136px;
+  background: var(--wave-top);
+  opacity: 0.92;
+  clip-path: polygon(0% 100%, 0% 64%, 16% 58%, 32% 67%, 50% 60%, 66% 68%, 82% 62%, 90% 55%, 96% 59%, 100% 63%, 100% 100%);
+  animation: waveTop 9s ease-in-out infinite;
+}
+
+.headerBoat {
+  position: absolute;
+  right: 26px;
+  bottom: 1px;
+  width: 56px;
+  height: 38px;
+  z-index: 4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23ffffff' stroke='%23ffffff'%3E%3Cg%3E%3Cpolygon points='488.776,302.008 78.962,302.008 0,302.008 75.612,414.785 483.916,414.785 512,302.008'/%3E%3Cpath d='M477.435,225.975h-36.726l-17.282-51.848h-45.367H306.16h-81.485l12.962-45.367h-15.122l-30.245,45.367 h-45.367L78.962,277.823h409.814L477.435,225.975z M187.95,242.818h-25.924v-25.924h25.924V242.818z M250.599,242.818h-25.924 v-25.924h25.924V242.818z M313.249,242.818h-25.924v-25.924h25.924V242.818z M369.418,242.818h-25.924v-25.924h25.924V242.818z'/%3E%3Cpolygon points='378.059,97.215 319.73,97.215 315.03,119.679 378.059,119.679'/%3E%3Cpolygon points='378.059,132.641 312.312,132.641 306.16,162.025 378.059,162.025'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center bottom;
+  filter: drop-shadow(0 4px 8px rgba(18, 46, 77, 0.28));
+  transform-origin: 50% 88%;
+  animation: boatSync 9s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -39,6 +94,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 3;
 }
 
 .headerLogo {
@@ -59,7 +116,7 @@
 .headerTitle {
   display: block;
   font-size: 17px;
-  font-weight: 650;
+  font-weight: 800;
   color: #ffffff;
   letter-spacing: 0.01em;
 }
@@ -81,8 +138,8 @@
 }
 
 .chatPanel {
-  flex: 1;
-  min-height: 0;
+  height: clamp(640px, calc(100dvh - 170px), 980px);
+  min-height: 640px;
 }
 
 .datePickerPanel {
@@ -101,8 +158,50 @@
   margin: 0;
 }
 
+@keyframes waveBase {
+  50% {
+    clip-path: polygon(0% 100%, 0% 54%, 12% 61%, 26% 56%, 40% 63%, 54% 56%, 68% 64%, 82% 57%, 92% 61%, 100% 55%, 100% 100%);
+  }
+}
+
+@keyframes waveMid {
+  50% {
+    clip-path: polygon(0% 100%, 0% 58%, 14% 64%, 30% 56%, 46% 65%, 62% 57%, 78% 64%, 92% 58%, 100% 60%, 100% 100%);
+  }
+}
+
+@keyframes waveTop {
+  50% {
+    clip-path: polygon(0% 100%, 0% 62%, 16% 68%, 34% 60%, 52% 69%, 70% 60%, 82% 69%, 90% 62%, 96% 66%, 100% 70%, 100% 100%);
+  }
+}
+
+@keyframes boatSync {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.7deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(0.7deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header::before,
+  .headerWaves::before,
+  .headerWaves::after,
+  .headerBoat {
+    animation: none;
+  }
+}
+
 @media (max-width: 900px) {
   .page {
     padding: 12px;
+  }
+
+  .chatPanel {
+    height: clamp(520px, calc(100dvh - 132px), 820px);
+    min-height: 520px;
   }
 }

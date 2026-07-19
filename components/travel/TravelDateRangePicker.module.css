@@ -62,6 +62,27 @@
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
+.picker :global(.rdp-root) {
+  --rdp-day-width: clamp(34px, 2.1vw, 42px);
+  --rdp-day-height: clamp(34px, 2.1vw, 42px);
+  --rdp-day_button-width: clamp(34px, 2.1vw, 42px);
+  --rdp-day_button-height: clamp(34px, 2.1vw, 42px);
+  --rdp-nav_button-width: 30px;
+  --rdp-nav_button-height: 30px;
+}
+
+.picker :global(.rdp-months) {
+  justify-content: center;
+}
+
+.picker :global(.rdp-month) {
+  width: 100%;
+}
+
+.picker :global(.rdp-caption_label) {
+  font-size: 0.94rem;
+}
+
 .picker:hover {
   border-color: #c5d7ea;
   box-shadow: 0 6px 14px rgba(40, 73, 111, 0.08);
@@ -87,5 +108,18 @@
   .confirmBtn {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .picker {
+    padding: 8px;
+  }
+
+  .picker :global(.rdp-root) {
+    --rdp-day-width: 36px;
+    --rdp-day-height: 36px;
+    --rdp-day_button-width: 36px;
+    --rdp-day_button-height: 36px;
   }
 }

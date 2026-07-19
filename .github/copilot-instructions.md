@@ -1,4 +1,4 @@
-# Copilot Instructions - ASistente de reservas POC
+# Copilot Instructions - Nauta de reservas POC
 
 ## Arquitectura
 - Frontend en Next.js App Router (`app/page.tsx`) con dos paneles: chat y UI rica.

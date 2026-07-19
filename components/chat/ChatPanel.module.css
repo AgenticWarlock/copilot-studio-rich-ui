@@ -1,6 +1,8 @@
 .wrapper {
   height: 100%;
-  min-height: 640px;
+  min-height: 100%;
+  max-height: 100%;
+  width: 100%;
   display: grid !important;
   grid-template-rows: auto 1fr auto;
   gap: 0 !important;
@@ -106,21 +108,14 @@
   color: #eef5ff !important;
   backdrop-filter: blur(2px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-
-.statusOnline {
-  background: rgba(61, 147, 104, 0.22) !important;
-  border-color: rgba(199, 237, 220, 0.55) !important;
-}
-
-.statusWarning {
-  background: rgba(187, 139, 62, 0.22) !important;
-  border-color: rgba(243, 218, 178, 0.55) !important;
-}
-
-.statusError {
-  background: rgba(171, 77, 77, 0.24) !important;
-  border-color: rgba(244, 199, 199, 0.55) !important;
+  font-size: 10px !important;
+  line-height: 14px !important;
+  font-weight: 600 !important;
+  font-family: "Segoe UI", "Segoe UI Web (West European)", Roboto, "Helvetica Neue", sans-serif !important;
+  letter-spacing: 0 !important;
+  transition: none !important;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .divider {
@@ -128,12 +123,14 @@
 }
 
 .messages {
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px 16px;
+  padding: 20px 16px 10px;
+  scroll-padding-bottom: 10px;
   position: relative;
   isolation: isolate;
   background:
@@ -142,7 +139,7 @@
     linear-gradient(90deg, rgba(25, 40, 62, 0.018) 1px, transparent 1px) 0 0/52px 52px,
     linear-gradient(rgba(25, 40, 62, 0.013) 1px, transparent 1px) 0 0/52px 52px,
     #f6f9fd;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   border-top: 1px solid rgba(22, 35, 58, 0.08);
   border-bottom: 1px solid rgba(22, 35, 58, 0.08);
 }
@@ -182,11 +179,6 @@
   opacity: 0.48;
   animation: seaBubblesRiseB 21s linear infinite;
   animation-delay: -12s;
-}
-
-.messages > * {
-  position: relative;
-  z-index: 1;
 }
 
 @keyframes seaBubblesRiseA {
@@ -297,8 +289,26 @@
 
 /* Contenido rico inline (date picker, etc.) */
 .inlineContent {
+  flex: 0 0 auto;
+  align-self: stretch;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+  scroll-margin-bottom: 10px;
   animation: fadeSlideIn 0.28s ease-out;
+}
+
+.inlineContent > * {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.inlineContent :global(.fui-Card) {
+  width: 100%;
+  max-width: 100%;
 }
 
 @keyframes fadeSlideIn {

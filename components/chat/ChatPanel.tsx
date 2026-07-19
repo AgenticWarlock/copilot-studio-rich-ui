@@ -19,15 +19,6 @@ interface ChatPanelProps {
   inlineContent?: React.ReactNode;
 }
 
-const statusColors: Record<AgentConnectionStatus, "success" | "warning" | "danger" | "informative"> = {
-  online: "success",
-  connecting: "warning",
-  reconnecting: "warning",
-  disconnected: "danger",
-  expired: "warning",
-  failed: "danger",
-};
-
 const statusLabels: Record<AgentConnectionStatus, string> = {
   online: "Conectado",
   connecting: "Conectando…",
@@ -37,21 +28,50 @@ const statusLabels: Record<AgentConnectionStatus, string> = {
   failed: "Error",
 };
 
-const statusClassNames: Record<AgentConnectionStatus, string> = {
-  online: styles.statusOnline,
-  connecting: styles.statusWarning,
-  reconnecting: styles.statusWarning,
-  disconnected: styles.statusError,
-  expired: styles.statusWarning,
-  failed: styles.statusError,
-};
-
 export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, inlineContent }: ChatPanelProps) {
+  const messagesContainerRef = useRef<HTMLElement>(null);
+  const inlineContentRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasInlineContent = inlineContent !== undefined && inlineContent !== null;
+
+  const scrollToBottom = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const raf = requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "auto",
+      });
+    });
+
+    return () => cancelAnimationFrame(raf);
+  };
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    return scrollToBottom();
   }, [messages, isBusy]);
+
+  useEffect(() => {
+    if (!hasInlineContent) return;
+
+    const container = messagesContainerRef.current;
+    const inline = inlineContentRef.current;
+    if (!container || !inline) {
+      return scrollToBottom();
+    }
+
+    const raf = requestAnimationFrame(() => {
+      const desiredBottomGap = 10;
+      const targetTop = inline.offsetTop + inline.clientHeight - container.clientHeight + desiredBottomGap;
+      container.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: "auto",
+      });
+    });
+
+    return () => cancelAnimationFrame(raf);
+  }, [hasInlineContent, messages.length]);
 
   return (
     <Card className={styles.wrapper} style={{ padding: 0, gap: 0 }}>
@@ -62,25 +82,29 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
             <Bot24Regular className={styles.botIcon} />
           </div>
           <div>
-            <Body1Strong className={styles.headerTitle}>ASistente de reservas</Body1Strong>
+            <Body1Strong className={styles.headerTitle}>Nauta de reservas</Body1Strong>
             <span className={styles.headerSub}>Reserva tu ferry</span>
           </div>
         </div>
         <Badge
           appearance="filled"
-          color={statusColors[connectionStatus]}
+          color="informative"
           size="small"
-          className={`${styles.statusBadge} ${statusClassNames[connectionStatus]}`}
+          className={styles.statusBadge}
         >
           {statusLabels[connectionStatus]}
         </Badge>
       </header>
-      <section className={styles.messages} aria-label="Historial de conversación">
+      <section
+        ref={messagesContainerRef}
+        className={`${styles.messages} ${hasInlineContent ? styles.messagesWithInline : ""}`}
+        aria-label="Historial de conversación"
+      >
         {messages.length === 0 && (
           <div className={styles.emptyState}>
             <span className={styles.emptyIcon}>⚓</span>
             <Body1Strong className={styles.emptyText}>
-              ¡Hola! Soy tu ASistente de reservas.
+              ¡Hola! Soy tu Nauta de reservas.
             </Body1Strong>
             <span className={styles.emptySub}>
               Cuéntame a dónde quieres viajar.
@@ -97,11 +121,11 @@ export function ChatPanel({ messages, isBusy, connectionStatus, onSendMessage, i
               <span className={styles.dot} />
               <span className={styles.dot} />
             </div>
-            <span className={styles.typingLabel}>ASistente de reservas está escribiendo…</span>
+            <span className={styles.typingLabel}>Nauta de reservas está escribiendo…</span>
           </div>
         )}
         {inlineContent && (
-          <div className={styles.inlineContent}>
+          <div ref={inlineContentRef} className={styles.inlineContent}>
             {inlineContent}
           </div>
         )}

@@ -46,6 +46,7 @@
 }
 
 .input :global(textarea) {
+  background: transparent !important;
   color: #1c2b42 !important;
   line-height: 1.42 !important;
 }
