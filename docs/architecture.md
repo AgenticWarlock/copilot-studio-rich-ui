@@ -1,26 +1,33 @@
-# Arquitectura POC Agencia de Viajes
+# Arquitectura
 
 ## Visión
-La POC separa claramente UI, contrato de eventos y transporte del agente para poder cambiar de mock a Direct Line sin romper componentes.
+
+La POC separa interfaz, contrato de eventos y transporte del agente. Esta separación permite alternar entre datos simulados y un agente de Copilot Studio sin acoplar los componentes de React a Direct Line.
 
 ## Capas
-- `app/`: composición principal de pantalla y endpoint placeholder.
+
+- `app/`: composición principal de pantalla y rutas API, incluido `POST /api/copilot/token`.
 - `components/chat`: experiencia conversacional.
-- `components/travel`: UI rica (fechas + vuelos).
-- `lib/agent`: interfaz `AgentTransport`, implementaciones y contratos.
-- `lib/mock`: datos simulados de vuelos.
-- `tests/`: pruebas de contrato y transporte mock.
+- `components/travel`: UI rica para fechas, vuelos, pasajeros y camarotes.
+- `lib/agent`: interfaz `AgentTransport`, implementaciones, adaptadores y contratos.
+- `lib/mocks`: datos simulados para el modo local.
+- `tests/`: pruebas de contratos, mock y adaptadores de Direct Line.
 
-## Flujo principal
-1. Usuario envía "Quiero viajar a Roma".
-2. `MockAgentTransport.sendMessage` responde con `ui.showMessage`.
-3. El mock emite `ui.showDatePicker`.
-4. La UI confirma rango y emite `ui.datesSelected`.
-5. El mock emite `ui.showFlights` con datos simulados.
-6. El usuario selecciona vuelo y UI emite `ui.flightSelected`.
-7. El mock confirma en chat con `ui.showMessage`.
+## Flujo
 
-## Evolución a Fase 2
-- Sustituir `MockAgentTransport` por `DirectLineTransport`.
-- Implementar `/api/copilot/token` con conexión a Copilot Studio.
-- Mantener contratos de eventos para minimizar impacto en la UI.
+```mermaid
+flowchart LR
+	page[app/page.tsx] --> transport[AgentTransport]
+	transport --> mock[MockAgentTransport]
+	transport --> direct[DirectLineTransport]
+	direct --> api[POST /api/copilot/token]
+	api --> copilot[Copilot Studio / Direct Line]
+```
+
+`createAgentTransport()` selecciona `DirectLineTransport` cuando `NEXT_PUBLIC_AGENT_TRANSPORT=directline`; en cualquier otro caso selecciona `MockAgentTransport`.
+
+En el flujo simulado, el usuario escribe `Quiero viajar a Roma`, el mock emite `ui.showDatePicker`, la interfaz devuelve `ui.datesSelected` y el mock responde con `ui.showFlights`. El mismo contrato permite que un agente real active componentes ricos mediante actividades de Direct Line.
+
+## Integración de Direct Line
+
+`DirectLineTransport` está implementado. Solicita un token a `POST /api/copilot/token`, que usa `COPILOT_TOKEN_ENDPOINT` solo en el servidor y valida la respuesta antes de devolverla al navegador. El dominio de Direct Line usa Europa por defecto y puede personalizarse con `NEXT_PUBLIC_DIRECT_LINE_DOMAIN`.

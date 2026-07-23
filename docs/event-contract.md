@@ -1,7 +1,7 @@
-# Event Contract (POC Fase 1)
+# Contrato de eventos
 
 ## Objetivo
-Definir un contrato cerrado entre UI y agente para un transporte simulado.
+Definir los eventos tipados entre la UI y el agente. Todos se validan con Zod, pero el código actual no integra todos los eventos declarados en la pantalla ni en el transporte de Direct Line.
 
 ## Reglas
 - Todos los eventos usan discriminated unions (`type`) y payload tipado.
@@ -9,6 +9,11 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
 - `ui.showMessage` no permite HTML en `payload.text`.
 
 ## Agente -> UI
+
+### Implementados por `DirectLineTransport`
+
+- `ui.showMessage` se recibe como una actividad Direct Line de tipo `message`.
+- `ui.showDatePicker`, `ui.showTravelPartySelector` y `ui.showCabinSelector` se reciben como actividades de tipo `event`.
 
 ### ui.showDatePicker
 ```json
@@ -22,6 +27,8 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
 ```
 
 ### ui.showFlights
+> **Pendiente de integración:** el esquema y el mock declaran este evento, pero `DirectLineTransport` no lo procesa y `app/page.tsx` no monta el componente de vuelos.
+
 ```json
 {
   "type": "ui.showFlights",
@@ -29,7 +36,19 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
     "destination": "Roma",
     "fromDate": "2026-10-12",
     "toDate": "2026-10-18",
-    "flights": []
+    "flights": [
+      {
+        "id": "AZ-1452",
+        "airline": "Aerolínea de ejemplo",
+        "origin": "Madrid",
+        "destination": "Roma",
+        "departureTime": "09:30",
+        "arrivalTime": "12:00",
+        "duration": "2h 30m",
+        "stops": 0,
+        "priceEur": 120
+      }
+    ]
   }
 }
 ```
@@ -44,7 +63,36 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
 }
 ```
 
+### ui.showTravelPartySelector
+```json
+{
+  "type": "ui.showTravelPartySelector",
+  "payload": {
+    "minPassengers": 1,
+    "maxPassengers": 4,
+    "defaultPassengers": 2,
+    "allowPets": true
+  }
+}
+```
+
+### ui.showCabinSelector
+```json
+{
+  "type": "ui.showCabinSelector",
+  "payload": {
+    "cabinId": "exterior-pet-friendly"
+  }
+}
+```
+
 ## UI -> Agente
+
+### Implementados por `DirectLineTransport`
+
+- `ui.datesSelected`
+- `ui.travelPartySelected`
+- `ui.cabinSelected`
 
 ### ui.datesSelected
 ```json
@@ -60,11 +108,24 @@ Definir un contrato cerrado entre UI y agente para un transporte simulado.
 ```
 
 ### ui.flightSelected
+> **Pendiente de integración:** el tipo está declarado, pero `DirectLineTransport.sendEvent` no lo envía y la pantalla actual no expone un selector de vuelos.
+
 ```json
 {
   "type": "ui.flightSelected",
   "payload": {
     "flightId": "AZ-1452"
+  }
+}
+```
+
+### ui.travelPartySelected
+```json
+{
+  "type": "ui.travelPartySelected",
+  "payload": {
+    "passengers": 2,
+    "hasPets": true
   }
 }
 ```

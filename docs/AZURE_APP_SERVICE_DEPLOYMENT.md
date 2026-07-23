@@ -126,6 +126,6 @@ Si `copilotTokenEndpointConfigured` es `false`, la variable `COPILOT_TOKEN_ENDPO
 | `next.config.ts` | Configuración de Next.js (sin output estático) |
 | `.deployment` | Referencia Kudu (Oryx auto-detecta Node.js) |
 | `.vscode/settings.json` | `zipIgnorePattern` para el despliegue desde VS Code |
-| `.env.example` | Plantilla de variables de entorno |
+| `.env.local` | Configuración local de desarrollo; no se despliega ni se versiona |
 | `app/api/health/route.ts` | Endpoint de diagnóstico |
 | `app/api/copilot/token/route.ts` | Endpoint server-side del token de Direct Line |
