@@ -254,13 +254,15 @@ Hay varias ideas que quiero seguir explorando:
 
 ## Contribuir
 
-Las ideas, issues y pull requests son bienvenidos.
+Si encuentras algún problema, tienes una idea para mejorar el proyecto o quieres experimentar con nuevos componentes, estaré encantado de recibir tus propuestas.
 
-Para proponer un cambio:
+Puedes contribuir de varias formas:
 
-1. Abre un issue para compartir la idea o discutir el alcance.
-2. Crea una rama con una modificación concreta.
-3. Ejecuta:
+- Abriendo un issue para comentar una idea o reportar un problema.
+- Enviando un pull request con una mejora concreta.
+- Compartiendo sugerencias sobre cómo crear mejores experiencias sobre Copilot Studio.
+
+Antes de enviar cambios, ejecuta:
 
 ```bash
 npm run lint
@@ -268,20 +270,12 @@ npm test
 npm run build
 ```
 
-4. Envía un pull request explicando qué cambia y cómo lo has probado.
-
-No incluyas endpoints, tokens ni valores de `.env.local` en issues, commits o pull requests.
+Por favor, no incluyas endpoints, tokens ni valores de `.env.local` en issues, commits o pull requests.
 
 ## Licencia
 
-Este repositorio todavía no incluye una licencia open source.
+Este proyecto se distribuye bajo la licencia MIT.
 
-Hasta que se publique un archivo `LICENSE`, todos los derechos permanecen reservados.
+Puedes usarlo, modificarlo y adaptarlo a tus propios proyectos respetando los términos de la licencia.
 
----
-
-Espero que este repositorio sirva como inspiración para construir experiencias donde Copilot Studio sea el cerebro de la solución, pero no tenga que definir por completo cómo interactúa el usuario.
-
-La conversación puede ser una parte de la experiencia.
-
-No necesariamente toda la experiencia.
+Consulta el archivo [LICENSE](LICENSE) para más información.
