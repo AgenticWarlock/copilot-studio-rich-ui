@@ -62,15 +62,16 @@ La interfaz trabaja con una abstracción llamada `AgentTransport`. Gracias a est
 
 ```mermaid
 flowchart TD
-    user[Usuario] --> ui[Interfaz Next.js]
-    ui --> transport[AgentTransport]
-    transport --> mock[MockAgentTransport]
-    transport --> directline[DirectLineTransport]
-    directline --> token[POST /api/copilot/token]
-    token --> copilot[Copilot Studio mediante Direct Line]
-    mock --> ui
-    copilot --> directline
-    directline --> ui
+    user[Usuario] <--> ui[Interfaz Next.js]
+    ui <--> transport[AgentTransport]
+
+    transport <--> mock[MockAgentTransport]
+    transport <--> directline[DirectLineTransport]
+
+    directline -. obtiene token .-> token[POST /api/copilot/token]
+    token -. servidor .-> tokenEndpoint[Endpoint de token de Copilot Studio]
+
+    directline <--> copilot[Copilot Studio mediante Direct Line]
 ```
 
 El modo se determina mediante la variable `NEXT_PUBLIC_AGENT_TRANSPORT`.
