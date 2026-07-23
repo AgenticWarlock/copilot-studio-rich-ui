@@ -1,78 +1,129 @@
 # Copilot Studio Rich UI
 
-![License: Not specified](https://img.shields.io/badge/license-not%20specified-lightgrey.svg) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/) [![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev/)
+![License: Not specified](https://img.shields.io/badge/license-not%20specified-lightgrey.svg)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev/)
 
-**Agentes de Copilot Studio que no parecen agentes de Copilot Studio.**
+> **Agentes de Copilot Studio que no parecen agentes de Copilot Studio.**
 
-Copilot Studio Rich UI es una prueba de concepto que explora una forma distinta de integrar agentes: Microsoft Copilot Studio conserva el papel de backend inteligente, mientras que una aplicación de negocio hecha con React y Next.js controla completamente la experiencia que ve el usuario.
+Siempre me ha gustado construir Power Apps que no parezcan Power Apps.
 
-En vez de reducir la interacción a una ventana de chat, la aplicación combina conversación y componentes orientados a tareas. La integración actual permite al agente solicitar fechas, datos de pasajeros o una selección de camarote; la interfaz responde con controles específicos del dominio. La conversación forma parte de la experiencia, pero no la define por completo.
+Este proyecto nace exactamente de la misma idea, pero aplicada a Copilot Studio.
+
+Quería explorar qué ocurre cuando dejamos de pensar en un agente únicamente como una ventana de chat y empezamos a tratarlo como el cerebro de una aplicación mucho más rica.
+
+En esta prueba de concepto, Microsoft Copilot Studio se encarga de la conversación, la inteligencia y la orquestación. La aplicación, construida con React y Next.js, controla la experiencia visual y muestra componentes específicos cuando el usuario los necesita: calendarios, selectores, formularios o tarjetas.
+
+La conversación sigue siendo importante, pero ya no tiene que ser toda la experiencia.
 
 ## Vista previa
 
-> **Captura o GIF pendiente:** añade aquí una demostración del flujo de reserva cuando el proyecto disponga de material visual publicado.
+> **GIF o vídeo pendiente:** aquí irá una demostración del flujo completo de reserva.
 
-## Características
+## ¿Qué intenta demostrar este proyecto?
 
-- Interfaz de reservas con chat y componentes de interacción rica.
-- Calendario de rango de fechas, selector de pasajeros y selector de camarotes activados por eventos del agente.
-- Capa `AgentTransport` para desacoplar la interfaz de la implementación del agente.
-- Dos modos de ejecución: `MockAgentTransport` para desarrollo local y `DirectLineTransport` para Copilot Studio.
-- Eventos bidireccionales con uniones discriminadas de TypeScript y validación mediante Zod.
-- Mensajes del agente sin HTML y validación del payload antes de actualizar la interfaz.
-- Endpoint server-side para obtener el token de Direct Line sin exponer el endpoint de token al navegador.
+La pregunta detrás del repositorio es bastante sencilla:
 
-## Arquitectura
+> **¿Tiene que ser un agente únicamente una conversación?**
 
-La página de Next.js crea un transporte al iniciar. El transporte publica eventos de agente a interfaz y recibe mensajes o selecciones de la interfaz. Así, los componentes no necesitan conocer Direct Line ni los detalles de Copilot Studio.
+Creo que no.
+
+Un agente puede entender la intención del usuario, decidir qué necesita y activar el componente más adecuado para completar una tarea.
+
+Por ejemplo:
+
+- Si necesita unas fechas, muestra un calendario.
+- Si necesita información sobre los viajeros, muestra un selector.
+- Si necesita que el usuario elija un camarote, presenta opciones visuales.
+- Si necesita confirmar una acción, puede utilizar un componente pensado específicamente para ello.
+
+Copilot Studio sigue siendo el backend inteligente, pero la interfaz deja de estar limitada por la experiencia de chat tradicional.
+
+## Lo que incluye actualmente
+
+- Una experiencia de reservas que combina chat y componentes ricos.
+- Selector de fechas de ida y vuelta.
+- Selector de pasajeros.
+- Selector de camarotes.
+- Una capa `AgentTransport` que desacopla la interfaz del agente.
+- Dos modos de ejecución:
+  - `MockAgentTransport` para desarrollo local.
+  - `DirectLineTransport` para conectar Copilot Studio.
+- Eventos bidireccionales entre el agente y la interfaz.
+- Validación de los eventos con TypeScript y Zod.
+- Obtención del token de Direct Line desde el servidor para no exponer el endpoint en el navegador.
+
+## Cómo funciona
+
+La idea principal es separar la experiencia visual de la forma en que se conecta el agente.
+
+La interfaz trabaja con una abstracción llamada `AgentTransport`. Gracias a esto, los componentes no necesitan saber si están hablando con un agente real de Copilot Studio o con un flujo simulado para desarrollo.
 
 ```mermaid
 flowchart TD
-		user[Usuario] --> ui[Interfaz Next.js]
-		ui --> transport[AgentTransport]
-		transport --> mock[MockAgentTransport]
-		transport --> directline[DirectLineTransport]
-		directline --> token[POST /api/copilot/token]
-		token --> copilot[Copilot Studio mediante Direct Line]
-		mock --> ui
-		copilot --> directline
-		directline --> ui
+    user[Usuario] --> ui[Interfaz Next.js]
+    ui --> transport[AgentTransport]
+    transport --> mock[MockAgentTransport]
+    transport --> directline[DirectLineTransport]
+    directline --> token[POST /api/copilot/token]
+    token --> copilot[Copilot Studio mediante Direct Line]
+    mock --> ui
+    copilot --> directline
+    directline --> ui
 ```
 
-El modo se determina con `NEXT_PUBLIC_AGENT_TRANSPORT`. Si el valor es `directline`, se usa `DirectLineTransport`; cualquier otro valor, o la ausencia de la variable, selecciona `MockAgentTransport`.
+El modo se determina mediante la variable `NEXT_PUBLIC_AGENT_TRANSPORT`.
 
-### Interacciones implementadas
+- Si su valor es `directline`, la aplicación utiliza `DirectLineTransport`.
+- Si la variable no existe o utiliza otro valor, se activa `MockAgentTransport`.
 
-`DirectLineTransport` muestra los mensajes del bot y procesa los eventos `ui.showDatePicker`, `ui.showTravelPartySelector` y `ui.showCabinSelector`. La interfaz envía `ui.datesSelected`, `ui.travelPartySelected` y `ui.cabinSelected` como actividades de Direct Line.
+## Interacciones implementadas
 
-Los tipos y esquemas también declaran `ui.showFlights` y `ui.flightSelected`, y el componente `FlightCarousel` existe en el repositorio, pero no está integrado en `app/page.tsx`. Por ello, el flujo de vuelos no forma parte de la experiencia funcional actual. Consulta [el contrato de eventos](docs/event-contract.md) para distinguir los eventos implementados de los que están definidos para una integración futura.
+Actualmente, `DirectLineTransport` procesa los siguientes eventos enviados por Copilot Studio:
+
+- `ui.showDatePicker`
+- `ui.showTravelPartySelector`
+- `ui.showCabinSelector`
+
+La interfaz devuelve las selecciones del usuario mediante:
+
+- `ui.datesSelected`
+- `ui.travelPartySelected`
+- `ui.cabinSelected`
+
+También están definidos los eventos `ui.showFlights` y `ui.flightSelected`, y existe un componente `FlightCarousel`. Sin embargo, ese flujo todavía no está conectado a la experiencia principal.
+
+Puedes consultar [el contrato de eventos](docs/event-contract.md) para ver qué interacciones están disponibles y cuáles forman parte de futuras iteraciones.
 
 ## Stack tecnológico
 
 - [Next.js 16](https://nextjs.org/) con App Router
-- [React 19](https://react.dev/) y TypeScript estricto
+- [React 19](https://react.dev/)
+- TypeScript estricto
 - [Fluent UI React](https://react.fluentui.dev/)
 - [Bot Framework Direct Line JS](https://www.npmjs.com/package/botframework-directlinejs)
-- [Zod](https://zod.dev/) para validar contratos
-- [Vitest](https://vitest.dev/) y ESLint
+- [Zod](https://zod.dev/) para validar los contratos de eventos
+- [Vitest](https://vitest.dev/)
+- ESLint
 
 ## Estructura del proyecto
 
 ```text
 app/                    Rutas de Next.js, pantalla principal y rutas API
 components/
-	chat/                 Componentes conversacionales
-	travel/               Calendarios, pasajeros, camarotes y componentes de vuelo no integrados
+    chat/               Componentes conversacionales
+    travel/             Calendarios, pasajeros, camarotes y componentes de vuelo
 docs/                   Arquitectura, contrato de eventos y despliegue
 lib/
-	agent/                Transportes, adaptadores, tipos y esquemas
-	mocks/                Datos y comportamiento para el modo simulado
+    agent/              Transportes, adaptadores, tipos y esquemas
+    mocks/              Datos y comportamiento del modo simulado
 tests/                  Pruebas unitarias de contratos y transportes
 ```
 
-## Ejecutar en local
+## Ejecutar el proyecto en local
 
-Requisitos: Node.js 20 o posterior y npm.
+Necesitas Node.js 20 o posterior y npm.
 
 ```bash
 git clone https://github.com/AgenticWarlock/copilot-studio-rich-ui.git
@@ -81,7 +132,13 @@ npm install
 npm run dev
 ```
 
-Abre `http://localhost:3000`. Los comandos disponibles son:
+Después, abre:
+
+```text
+http://localhost:3000
+```
+
+Otros comandos disponibles:
 
 ```bash
 npm run lint
@@ -90,9 +147,11 @@ npm run build
 npm start
 ```
 
-## Usar `MockAgentTransport`
+## Probarlo sin Copilot Studio
 
-`MockAgentTransport` es el modo predeterminado. Permite desarrollar la interfaz, hacer demostraciones y ejecutar pruebas sin publicar ni configurar un agente de Copilot Studio.
+`MockAgentTransport` es el modo predeterminado.
+
+Permite probar la interfaz, desarrollar nuevos componentes y hacer demostraciones sin tener que publicar o configurar previamente un agente de Copilot Studio.
 
 Crea o actualiza `.env.local`:
 
@@ -100,51 +159,128 @@ Crea o actualiza `.env.local`:
 NEXT_PUBLIC_AGENT_TRANSPORT=mock
 ```
 
-Reinicia `npm run dev` después de cambiar variables de entorno. Para probar el flujo incluido, escribe `Quiero viajar a Roma`; el mock mostrará un selector de fechas. Al confirmar el rango, el mock emite `ui.showFlights`, pero la pantalla actual no monta el componente que presentaría esos vuelos.
+Después de cambiar una variable de entorno, reinicia `npm run dev`.
 
-## Conectar Copilot Studio mediante Direct Line
+Para iniciar el flujo incluido, escribe:
 
-El modo real usa `DirectLineTransport`. El navegador solicita un token a la ruta local `POST /api/copilot/token`; esa ruta consulta `COPILOT_TOKEN_ENDPOINT` en el servidor y valida una respuesta con `token`, `expires_in` y `conversationId`.
+```text
+Quiero viajar a Roma
+```
 
-1. Publica el agente y configura los eventos de Direct Line que están implementados: `ui.showDatePicker`, `ui.showTravelPartySelector` y `ui.showCabinSelector`. [El contrato](docs/event-contract.md) identifica las declaraciones aún no integradas en la pantalla.
-2. Crea `.env.local` en la raíz del proyecto:
+El mock mostrará el selector de fechas y continuará el flujo simulado.
 
-	 ```dotenv
-	 COPILOT_TOKEN_ENDPOINT=https://<tu-endpoint-de-token>
-	 NEXT_PUBLIC_AGENT_TRANSPORT=directline
-	 ```
+Actualmente, el mock también puede emitir `ui.showFlights`, aunque el carrusel de vuelos todavía no está conectado a la pantalla principal.
 
-3. Si tu canal Direct Line no está en Europa, añade el dominio regional:
+## Conectar un agente real de Copilot Studio
 
-	 ```dotenv
-	 NEXT_PUBLIC_DIRECT_LINE_DOMAIN=https://<tu-dominio-direct-line>/v3/directline
-	 ```
+El modo real utiliza `DirectLineTransport`.
 
-4. Reinicia el servidor de desarrollo y abre la aplicación.
+El navegador solicita un token a la ruta local:
 
-`COPILOT_TOKEN_ENDPOINT` no debe llevar el prefijo `NEXT_PUBLIC_`: solo se usa en el servidor. `.env.local` está excluido por Git. Para comprobar la configuración sin revelar secretos, consulta `GET /api/health`.
+```text
+POST /api/copilot/token
+```
 
-## Roadmap
+Esta ruta consulta `COPILOT_TOKEN_ENDPOINT` desde el servidor y devuelve al cliente la información necesaria para establecer la conexión con Direct Line.
 
-- [x] Abstracción de transporte y flujo simulado para desarrollo local.
-- [x] Conexión de Direct Line, obtención de token en servidor y adaptadores de actividades.
-- [x] Validación de mensajes y de los eventos de fecha, pasajeros y camarote.
-- [ ] Publicar captura o GIF del flujo completo.
-- [ ] Integrar el carrusel de vuelos y completar el flujo `ui.showFlights` / `ui.flightSelected`.
-- [ ] Ampliar ejemplos de configuración de Copilot Studio para los eventos pendientes.
-- [ ] Añadir pruebas de integración con un entorno de Direct Line controlado.
+### 1. Configura el agente
+
+Publica el agente de Copilot Studio y configura los eventos que la interfaz reconoce actualmente:
+
+- `ui.showDatePicker`
+- `ui.showTravelPartySelector`
+- `ui.showCabinSelector`
+
+Consulta [el contrato de eventos](docs/event-contract.md) para conocer el formato de cada interacción.
+
+### 2. Configura las variables de entorno
+
+Crea `.env.local` en la raíz del proyecto:
+
+```dotenv
+COPILOT_TOKEN_ENDPOINT=https://<tu-endpoint-de-token>
+NEXT_PUBLIC_AGENT_TRANSPORT=directline
+```
+
+### 3. Configura el dominio regional si es necesario
+
+Si tu canal de Direct Line no está alojado en Europa, añade:
+
+```dotenv
+NEXT_PUBLIC_DIRECT_LINE_DOMAIN=https://<tu-dominio-direct-line>/v3/directline
+```
+
+### 4. Reinicia la aplicación
+
+```bash
+npm run dev
+```
+
+`COPILOT_TOKEN_ENDPOINT` no debe utilizar el prefijo `NEXT_PUBLIC_`, ya que solo se consume en el servidor.
+
+El archivo `.env.local` está excluido de Git.
+
+Para comprobar el estado de la configuración sin exponer secretos, puedes consultar:
+
+```text
+GET /api/health
+```
+
+## Estado actual
+
+Este repositorio es una prueba de concepto y todavía está evolucionando.
+
+La conexión con Copilot Studio mediante Direct Line está implementada, al igual que los componentes de fechas, pasajeros y camarotes.
+
+El carrusel de vuelos y sus eventos ya están definidos, pero todavía no forman parte del flujo principal.
+
+Prefiero dejar esto visible en lugar de presentar el proyecto como algo más completo de lo que realmente es.
+
+## ¿Qué sigue?
+
+Hay varias ideas que quiero seguir explorando:
+
+- [x] Crear una abstracción de transporte.
+- [x] Añadir un modo simulado para desarrollo local.
+- [x] Conectar Copilot Studio mediante Direct Line.
+- [x] Validar mensajes y eventos.
+- [ ] Publicar una demostración visual del flujo completo.
+- [ ] Integrar el carrusel de vuelos.
+- [ ] Completar los eventos `ui.showFlights` y `ui.flightSelected`.
+- [ ] Añadir más ejemplos de configuración de Copilot Studio.
+- [ ] Crear nuevos componentes ricos.
+- [ ] Añadir pruebas de integración con un entorno controlado de Direct Line.
 
 ## Contribuir
 
-Las contribuciones son bienvenidas. Para proponer un cambio:
+Las ideas, issues y pull requests son bienvenidos.
 
-1. Abre un issue para discutir cambios de alcance o contrato.
-2. Crea una rama con una modificación enfocada.
-3. Ejecuta `npm run lint`, `npm test` y `npm run build`.
-4. Envía un pull request explicando el comportamiento y las pruebas realizadas.
+Para proponer un cambio:
+
+1. Abre un issue para compartir la idea o discutir el alcance.
+2. Crea una rama con una modificación concreta.
+3. Ejecuta:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+4. Envía un pull request explicando qué cambia y cómo lo has probado.
 
 No incluyas endpoints, tokens ni valores de `.env.local` en issues, commits o pull requests.
 
 ## Licencia
 
-Este repositorio no incluye actualmente un archivo de licencia. Todos los derechos quedan reservados hasta que el mantenedor publique una licencia explícita.
+Este repositorio todavía no incluye una licencia open source.
+
+Hasta que se publique un archivo `LICENSE`, todos los derechos permanecen reservados.
+
+---
+
+Espero que este repositorio sirva como inspiración para construir experiencias donde Copilot Studio sea el cerebro de la solución, pero no tenga que definir por completo cómo interactúa el usuario.
+
+La conversación puede ser una parte de la experiencia.
+
+No necesariamente toda la experiencia.
