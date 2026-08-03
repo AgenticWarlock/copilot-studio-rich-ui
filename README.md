@@ -165,10 +165,10 @@ NEXT_PUBLIC_AGENT_TRANSPORT=mock
 
 Después de cambiar una variable de entorno, reinicia `npm run dev`.
 
-Para iniciar el flujo incluido, escribe:
+Para iniciar el flujo incluido, escribe por ejemplo:
 
 ```text
-Quiero viajar a Roma
+Quiero viajar a Ibiza
 ```
 
 El mock mostrará el selector de fechas y continuará el flujo simulado.
