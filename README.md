@@ -248,9 +248,7 @@ Hay varias ideas que quiero seguir explorando:
 - [x] Añadir un modo simulado para desarrollo local.
 - [x] Conectar Copilot Studio mediante Direct Line.
 - [x] Validar mensajes y eventos.
-- [ ] Publicar una demostración visual del flujo completo.
-- [ ] Integrar el carrusel de vuelos.
-- [ ] Completar los eventos `ui.showFlights` y `ui.flightSelected`.
+- [x] Publicar una demostración visual del flujo completo.
 - [ ] Añadir más ejemplos de configuración de Copilot Studio.
 - [ ] Crear nuevos componentes ricos.
 - [ ] Añadir pruebas de integración con un entorno controlado de Direct Line.
