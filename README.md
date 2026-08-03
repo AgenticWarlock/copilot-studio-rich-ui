@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/65dad967-68ce-4f94-b4b1-693d240d2b2d" />
+
 # Copilot Studio Rich UI
 
 ![License: Not specified](https://img.shields.io/badge/license-not%20specified-lightgrey.svg)
