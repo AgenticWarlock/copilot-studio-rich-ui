@@ -21,8 +21,13 @@ La conversación sigue siendo importante, pero ya no tiene que ser toda la exper
 
 ## Vista previa
 
-<img width="400" height="419" alt="Copilot Rich UI Demo" src="https://github.com/user-attachments/assets/5fb7bf40-3155-4301-aa23-e8aa1a9278c8" />
-
+<p align="center">
+  <img
+    width="700"
+    alt="Demostración de Copilot Studio Rich UI"
+    src="https://github.com/user-attachments/assets/5fb7bf40-3155-4301-aa23-e8aa1a9278c8"
+  />
+</p>
 
 ## ¿Qué intenta demostrar este proyecto?
 
